@@ -8,6 +8,7 @@
 
 import sys
 import re
+import csv
 
 """Baby Names exercise
 
@@ -40,7 +41,7 @@ def file_open(filename):
     Opens a file and returns the entire contents of that file in a
     single string
     """
-    f = open(filename, 'rU')
+    f = open(filename, 'rwU')
     filecontents = f.read()
     f.close()
     return filecontents
@@ -54,17 +55,29 @@ def extract_names(filename):
     """
     # +++your code here+++
     filecontents = file_open(filename)
+    output_names = []
     match_year = re.search(r'Popularity in (\d\d\d\d)', filecontents)
-    match_names = re.findall(r'<td>(\d+)</td><td>(\w+)</td>''<td>(\w+)</td>',
-                             filecontents)
-    names_list = []
-    for line in match_names:
-        line1 = (line[1] + ' ' + line[0])
-        line2 = (line[2] + ' ' + line[0])
-        names_list.append(line1)
-        names_list.append(line2)
-    return names_list
+    #match_names is a list of tuples
+    tpl_match_names = re.findall(r'<td>(\d+)</td><td>(\w+)</td>''<td>(\w+)</td>', filecontents)
+    output_names.append(match_year.group(1))
+    dict_names = {}
+    for rank, boy_name, girl_name in tpl_match_names:
+        if boy_name not in dict_names:
+            dict_names[boy_name] = rank
+        if girl_name not in dict_names:
+            dict_names[girl_name] = rank
+    sorted_dict_names = sorted(dict_names.keys())
+    for name in sorted_dict_names:
+        output_names.append(name + ' ' + dict_names[name])
+    print type(output_names)
+    print type(output_names[20])
+    return output_names
 
+
+def write_file(filename, filecontents):
+    """
+    This function takes a filename and file contents and writes them to a text file
+    """
 
 def main():
     # This command-line parsing code is provided.
@@ -81,17 +94,31 @@ def main():
     if args[0] == '--summaryfile':
         summary = True
         del args[0]
+    if args[0] == '--summarycsv':
+        summary_csv = True
+        del args[0]
 
     # +++your code here+++
     # For each filename, get the names, then either print the text output
     # or write it to a summary file
+    #if summary == True:
+    #    pass
+
     for arg in args:
-        i = 0
         names_list = extract_names(arg)
-        print names_list[2]
-        for names in names_list:
-            print names_list[i]
-            i += 1
+        text = '\n'.join(names_list)
+
+        if summary == True:
+            summary_output_file = open(arg + '.summary', 'w')
+            summary_output_file.write(text + '\n')
+            summary_output_file.close()
+        elif summary_csv == True:
+            summary_output_csv = open(arg + '.csv', 'wb')
+            writer = csv.writer(summary_output_csv, delimiter=' ', quotechar=' ', quoting=csv.QUOTE_ALL)
+            writer.writerows(names_list)
+
+        else:
+            print text
 
 
 if __name__ == '__main__':
