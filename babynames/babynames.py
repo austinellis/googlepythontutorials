@@ -69,8 +69,8 @@ def extract_names(filename):
     sorted_dict_names = sorted(dict_names.keys())
     for name in sorted_dict_names:
         output_names.append(name + ' ' + dict_names[name])
-    print type(output_names)
-    print type(output_names[20])
+    #print type(output_names)
+    #print type(output_names[20])
     return output_names
 
 
@@ -106,6 +106,7 @@ def main():
 
     for arg in args:
         names_list = extract_names(arg)
+        print type(names_list)
         text = '\n'.join(names_list)
 
         if summary == True:

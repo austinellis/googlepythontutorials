@@ -38,6 +38,8 @@ print_words() and print_top().
 """
 
 import sys
+from bs4 import BeautifulSoup
+import urllib
 
 # +++your code here+++
 # Define print_words(filename) and print_top(filename) functions.
@@ -46,6 +48,7 @@ import sys
 # Then print_words() and print_top() can just call the utility function.
 
 #
+
 
 def file_open(filename):
     f = open(filename, 'rU')
@@ -62,13 +65,36 @@ def file_open(filename):
                 filetext[word] = 1
     return filetext
 
+
+def url_open(url):
+    """
+
+    """
+    soup = BeautifulSoup(urllib.urlopen(url))   #Creates unicode from page
+    new_soup = soup.get_text()      #Unicode var type
+    soup_words = new_soup.split()   #list var type
+    word_dict = {}
+
+    for item in soup_words:
+        word = item.encode('utf-8').lower()
+        if word in word_dict.keys():
+            val = word_dict.get(word)
+            val += 1
+            word_dict[word] = val
+        else:
+            word_dict[word] = 1
+    return word_dict
+
+
 def print_words(filename):
     filetext = file_open(filename)
     for item in sorted(filetext.keys()):
         print item, ':', filetext[item]
 
+
 def get_count(word_count):
     return word_count[1]
+
 
 def print_top(filename):
     filetext = file_open(filename)
@@ -78,21 +104,29 @@ def print_top(filename):
         print items[0], items[1]
 
 
+def print_web(url):
+    word_dict = url_open(url)
+    for item in sorted(word_dict.keys()):
+        print item, ':', word_dict[item]
+
+
 # This basic command line argument parsing code is provided and
 # calls the print_words() and print_top() functions which you must define.
 
 
 def main():
     if len(sys.argv) != 3:
-        print 'usage: ./wordcount.py {--count | --topcount} file'
+        print 'usage: ./wordcount.py {--count | --topcount | --url} file'
         sys.exit(1)
 
     option = sys.argv[1]
-    filename = sys.argv[2]
+    source = sys.argv[2]
     if option == '--count':
-        print_words(filename)
+        print_words(source)
     elif option == '--topcount':
-        print_top(filename)
+        print_top(source)
+    elif option == '--url':
+        print_web(source)
     else:
         print 'unknown option: ' + option
         sys.exit(1)
